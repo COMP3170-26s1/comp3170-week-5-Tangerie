@@ -25,6 +25,9 @@ public class Flower extends SceneObject {
 	private int vertexBuffer;
 	private int[] indices;
 	private int indexBuffer;
+	
+	private SceneObject headPivot;
+	private FlowerHead head;
 
 	public Flower(int nPetals) {
 		shader = ShaderLibrary.instance.compileShader(VERTEX_SHADER, FRAGMENT_SHADER);		
@@ -59,6 +62,16 @@ public class Flower extends SceneObject {
 		};
 		    
 		indexBuffer = GLBuffers.createIndexBuffer(indices);
+		
+		headPivot = new SceneObject();
+		headPivot.setParent(this);
+		headPivot.getMatrix()
+			.translate(0, 1, 0);
+		
+		head = new FlowerHead(nPetals, new Vector3f(1f, 1f, 0f));
+		
+		head.setParent(headPivot);
+		head.getMatrix().scale(0.4f);
 	}
 	
 	public void drawSelf(Matrix4f mvpMatrix) {

@@ -4,7 +4,10 @@ import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL41.*;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import comp3170.OpenGLException;
 import comp3170.IWindowListener;
@@ -18,8 +21,8 @@ import java.io.IOException;
 
 public class Week5 implements IWindowListener {
 	private Window window;
-	private int width = 800;
-	private int height = 800;
+	private int width = 600;
+	private int height = 600;
 
 	final private File DIRECTORY = new File("src/comp3170/week5/shaders/"); 
 
@@ -52,8 +55,22 @@ public class Week5 implements IWindowListener {
 		if (input.wasMouseClicked()) {
 			// TODO: Get the mouse position into NDC, and then into world space. (TASK 2)
 			input.getCursorPos(position); // This will get the mouse position in screen space.
-
-			// TODO: Add a new flower at the mouse position. (TASK 3)
+																			// flip the y so -1 is the bottom
+			Vector2f screenSpace = new Vector2f((float)position.x / width, -(float)position.y / height);
+			screenSpace
+				.mul(2f)
+				.add(-1f, 1f);
+			
+			Matrix4f inv = new Matrix4f();
+			mvpMatrix.invert(inv);
+			
+			Vector4f p = new Vector4f(screenSpace.x, screenSpace.y, 0f, 1f);
+			p.mul(inv);
+			
+			scene.createFlower(p);
+			System.out.println(String.format("%d %d", position.x, position.y));
+			System.out.println(String.format("%f %f", screenSpace.x, screenSpace.y));
+			System.out.println(String.format("%f %f %f", p.x, p.y, p.z));
 		}
 		
 		input.clear(); // Run this to clear input before the next frame.
@@ -72,6 +89,13 @@ public class Week5 implements IWindowListener {
 		
 		// TODO: Use the view and projection matricies to construct the mvpMatrix. (TASK 2)
 		//			Then send it down the scene graph!
+		scene.sceneCam().GetProjectionMatrix(projectionMatrix);
+		scene.sceneCam().GetViewMatrix(viewMatrix);
+		mvpMatrix.identity();
+		mvpMatrix
+			.mul(viewMatrix)
+			.mul(projectionMatrix);
+		
 		scene.draw(mvpMatrix);
 			
 	}
@@ -82,7 +106,8 @@ public class Week5 implements IWindowListener {
 		this.width = width;
 		this.height = height;
 		glViewport(0,0,width,height);
-		// TODO: Recalculate the projection matrix when the window is resized. (TASK 2)
+		
+		scene.sceneCam().resize(width, height);
 	}
 
 	@Override

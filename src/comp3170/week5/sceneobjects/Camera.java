@@ -9,16 +9,20 @@ import comp3170.InputManager;
 
 public class Camera extends SceneObject {
 
-	private float zoom = 20.0f; // You'll need this when setting up your projection matrix...
+	private float zoom = 10.0f; // You'll need this when setting up your projection matrix...
 	private Matrix4f projectionMatrix = new Matrix4f();
 	private Matrix4f viewMatrix = new Matrix4f();
+	
+	private static final float ZOOM_SPEED = 5f;
+	
+	private float aspectRatio = 1f;
 	
 	public Camera() {
 		
 	}
 	
 	public void resize(int w, int h) {
-		//TODO: Change the projection matrix when the window is resized. (TASK 2)
+		aspectRatio = (float)w / (float)h;
 	}
 	
 	public Matrix4f GetViewMatrix(Matrix4f dest) {
@@ -35,11 +39,14 @@ public class Camera extends SceneObject {
 	
 	public void update(InputManager input, float deltaTime) {
 		if (input.isKeyDown(GLFW_KEY_UP)) {
-			// TODO: Zoom the camera in
+			zoom -= deltaTime * ZOOM_SPEED;
 		}
 			
 		if (input.isKeyDown(GLFW_KEY_DOWN)) {
-			// TODO: Zoom the camera out
+			zoom += deltaTime * ZOOM_SPEED;
 		}
+		
+		// Change to aspect
+		projectionMatrix.scaling(aspectRatio * zoom, zoom, 1.0f);
 	}
 }
